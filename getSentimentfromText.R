@@ -5,6 +5,9 @@
 getSentiment <- function(series_of_strings, model_cloud){
   # TO DO
   # Option to pass series of strings in diff formats
+  require(tibble)
+  require(dplyr)
+  require(httr)
   
   # Model endpoint
   model_endpoint <- paste0(model_cloud, 'model/predict')
@@ -15,7 +18,7 @@ getSentiment <- function(series_of_strings, model_cloud){
   # POST
   response <- httr::POST(model_endpoint, 
                          httr::add_headers(.headers=c(`Content-Type` = 'application/json')), 
-                         body = data_series, 
+                         body = series_parsed, 
                          encode = c("multipart")
                          ) %>% content()
   
@@ -24,7 +27,6 @@ getSentiment <- function(series_of_strings, model_cloud){
   position <- 0
   
   for (prediction in response$predictions){
-    
     position <- position + 1
     
     output$positive[position] <- prediction[[1]]$positive
@@ -33,3 +35,13 @@ getSentiment <- function(series_of_strings, model_cloud){
   
   return(output)
 }
+
+## Example
+
+# input <- tibble(text = c("The Model Asset Exchange is a crucial element of a developer\'s toolkit.",
+#                          "Have a great Friday!",
+#                          "What time do we leave tomorrow?",
+#                          "This restaurant is not good."))
+# 
+# output <- getSentiment(series_of_strings <- input$text,
+#              model_cloud = "http://max-text-sentiment-classifier.max.us-south.containers.appdomain.cloud/")

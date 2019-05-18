@@ -1,10 +1,12 @@
 #' Get Sentiment from Text
 #' 
-#' @param series_of_strings series of strings, as characters
+#' @param series_of_strings series of strings or column from a dataframe, as characters
 #' @param model_cloud .cloud link to model from https://developer.ibm.com/exchanges, as a string
 getSentiment <- function(series_of_strings, model_cloud){
   # TO DO
   # Option to pass series of strings in diff formats
+  # add try / except for error messages
+  
   require(tibble)
   require(dplyr)
   require(httr)
@@ -12,6 +14,8 @@ getSentiment <- function(series_of_strings, model_cloud){
   # Model endpoint
   model_endpoint <- paste0(model_cloud, 'model/predict')
   
+  # parse strings into json format that model API can read
+  series_of_strings <- as.character(series_of_strings)
   series_collapsed <- paste(series_of_strings, collapse = '\", \"')
   series_parsed <- paste0('{ "text": [\"', series_collapsed, '\"]}')
   
@@ -22,7 +26,7 @@ getSentiment <- function(series_of_strings, model_cloud){
                          encode = c("multipart")
                          ) %>% content()
   
-  # parse the response into a tibble ----------------
+  # unpack the response into a tibble 
   output <- tibble(text = series_of_strings, positive = NA, negative = NA)
   position <- 0
   
